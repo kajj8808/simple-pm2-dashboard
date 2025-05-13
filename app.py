@@ -31,6 +31,24 @@ def restart_process(pm_id):
         st.code(f""" `{pm_id}` Process Restart Succeful⭐""")
 
 
+def pm2_log():
+    process = subprocess.Popen(
+        ["pm2", "log"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True
+    )
+    try:
+        for line in process.stdout:
+            yield line
+    except GeneratorExit:
+        process.terminate()
+    except Exception as e:
+        yield f"오류 발생: {e}"
+    finally:
+        process.terminate()
+
+
 st.set_page_config(
     page_title="PM2 Kajj8808",
     page_icon="🔮"
@@ -51,3 +69,5 @@ with st.container():
         col1.write(f"`{status['pm_id']}` {status['name']}")
         if col2.button("restart", key=f"restart-{status['name']}"):
             restart_process(status['pm_id'])
+    if st.button("log streming start"):
+        st.write_stream(pm2_log)
